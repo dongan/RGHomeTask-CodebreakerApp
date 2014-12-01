@@ -1,0 +1,50 @@
+#!/usr/bin/env ruby
+require 'codebreaker'
+
+class CodebreakerApp
+  include Codebreaker
+  
+  def start
+  	@game = Game.new
+  	@game.start
+  	@turns_left = 20
+
+  	puts "Secret code generated"
+  	loop do
+  	  puts "Try your number"
+  	  puts "You have #{ @turns_left } turns left"
+
+  	  users_input = gets.strip
+  	
+  	  case users_input
+  	  when "hint" then
+  	  	puts @game.hint
+  	  	next
+  	  when "exit" then
+  	  	puts "Game over"
+  	  	break
+  	  else
+  	  	begin
+  	      result = @game.try_number(users_input)
+  	      puts result
+  	    rescue ArgumentError
+  	  	  puts "Sorry. You have to enter 4 numbers(1-6)"
+  	  	  @turns_left += 1
+  	    end	
+  	  end
+
+  	  @turns_left -= 1
+  	  
+  	  if @turns_left <= 0 || result == "++++"
+  	  	puts "Game over"
+  	  	puts "Enter your name: "
+  	  	@game.set_current_user_name(gets.strip)
+  	  	@game.save_user_data_to("codebreaker_results.yaml")
+  	  	break
+  	  end	
+  	end
+  end	
+end
+
+game = CodebreakerApp.new
+game.start
